@@ -1,0 +1,374 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+
+<title id="title-el"
+  data-en="TableLens · On-Device Table Scanner"
+  data-zh="TableLens · 本地表格识别扫描">TableLens · On-Device Table Scanner</title>
+
+<meta name="description" id="meta-desc"
+  data-en="TableLens extracts tables from photos with local on-device AI. Scan or import images, fix edges, edit cells, and export CSV/JSON/PDF — no cloud upload by default."
+  data-zh="TableLens 使用本地模型在设备端提取表格。拍照/导入、边界校正、编辑单元格并导出 CSV/JSON/PDF——默认不上传云端。"
+  content="TableLens extracts tables from photos with local on-device AI. Scan or import images, fix edges, edit cells, and export CSV/JSON/PDF — no cloud upload by default.">
+
+<link rel="icon" href="favicon.ico">
+
+<style>
+:root{
+  /* TableLens Sage Green theme */
+  --bg:#0B1411;
+  --surface:#101C17;
+  --text:#F4FBF7;
+  --text2:#B9D2C6;
+
+  --accent:#8CBFA8;   /* sage */
+  --accent2:#4F8E74;  /* deeper sage */
+
+  --chip:#152520;
+  --chip2:#13231D;
+}
+*{box-sizing:border-box}
+html,body{
+  margin:0;background:var(--bg);color:var(--text);
+  font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Helvetica, Arial,
+  Noto Sans, "PingFang SC", "Hiragino Sans GB", "Microsoft Yahei", sans-serif;
+}
+a{color:var(--accent);text-decoration:none}
+.container{max-width:1100px;margin:0 auto;padding:40px 24px}
+nav{display:flex;justify-content:space-between;align-items:center;gap:16px}
+.brand{display:flex;align-items:center;gap:12px;font-weight:700}
+.brand img.icon{width:40px;height:40px;border-radius:12px}
+.lang-switch{display:flex;gap:8px;background:var(--surface);border-radius:12px;padding:6px}
+.lang-switch button{all:unset;cursor:pointer;padding:6px 14px;border-radius:10px;color:var(--text2);font-weight:600}
+.lang-switch button.active{background:var(--accent);color:#07110D}
+.nav-links{display:flex;gap:18px;align-items:center}
+.nav-links a{color:var(--text2);font-weight:600}
+.nav-links a:hover{color:var(--text)}
+
+.hero{display:grid;grid-template-columns:1.1fr 0.9fr;gap:36px;align-items:center;margin-top:40px}
+.hero h1{font-size:40px;line-height:1.1;margin:0 0 16px}
+.hero p.lead{color:var(--text2);font-size:18px;margin:0 0 24px}
+.cta{display:flex;gap:12px;flex-wrap:wrap}
+.button{
+  display:inline-flex;align-items:center;gap:10px;
+  background:linear-gradient(180deg,var(--accent),var(--accent2));
+  color:#07110D;font-weight:800;padding:14px 22px;border-radius:14px;
+  box-shadow:0 10px 30px rgba(140,191,168,.22);
+}
+.button.ghost{background:transparent;color:var(--text);border:1px solid rgba(255,255,255,.15)}
+.card{background:var(--surface);border-radius:20px;padding:24px;box-shadow:0 10px 30px rgba(0,0,0,.25);}
+.section{margin-top:80px}
+.grid-2{display:grid;grid-template-columns:repeat(2,1fr);gap:24px}
+.grid-3{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:24px}
+.tag{
+  display:inline-block;padding:6px 10px;border-radius:8px;font-size:13px;
+  background:rgba(140,191,168,.14);color:#CFE8DB
+}
+.sample{width:100%;border-radius:18px;box-shadow:0 12px 40px rgba(0,0,0,.35);background:#0f1118;aspect-ratio:9/19.5;object-fit:cover}
+.footer{margin-top:80px;color:var(--text2);font-size:14px;border-top:1px solid rgba(255,255,255,.08);padding:32px 0}
+.gallery{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:18px}
+.gallery img{
+  width:100%;border-radius:18px;box-shadow:0 12px 40px rgba(0,0,0,.35);
+  background:#0f1118;aspect-ratio:9/19.5;object-fit:cover
+}
+/* Portrait ratio */
+.gallery img.portrait { aspect-ratio: 9 / 19.5; }
+/* Landscape ratio (iPad / tablets) */
+.gallery img.landscape { aspect-ratio: 16 / 10; }
+@media (max-width:960px){ .hero{grid-template-columns:1fr} }
+
+/* Hero card: TableLens scan-to-table preview */
+.tl-card{border-radius:18px;overflow:hidden;box-shadow:0 20px 50px rgba(0,0,0,.35);background:#0E1A15}
+.tl-top{
+  padding:22px 22px 10px;color:#CFE8DB;font-weight:900;letter-spacing:.04em
+}
+.tl-body{
+  background:
+    linear-gradient(180deg,rgba(140,191,168,.14),rgba(140,191,168,0) 40%),
+    linear-gradient(180deg,#12251D,#0B1411);
+  padding:22px
+}
+.tl-row{display:flex;align-items:center;gap:10px;margin:10px 0}
+.tl-mini{
+  width:34px;height:34px;border-radius:10px;
+  background:linear-gradient(180deg,#A4D0BA,#5A9B7E);
+  opacity:.9
+}
+.tl-line{
+  height:10px;border-radius:6px;background:rgba(255,255,255,.10);flex:1
+}
+.tl-line.bold{height:14px;background:rgba(255,255,255,.16);width:72%}
+.tl-chip{
+  display:inline-flex;align-items:center;gap:8px;
+  padding:6px 10px;border-radius:10px;background:rgba(255,255,255,.06);
+  color:var(--text2);font-size:12px;font-weight:700
+}
+.tl-dots{display:flex;gap:6px}
+.tl-dot{width:8px;height:8px;border-radius:50%;background:var(--accent)}
+.tl-grid{
+  margin-top:10px;border-radius:12px;background:rgba(255,255,255,.04);padding:12px
+}
+.tl-grid .r{display:flex;gap:10px;margin:8px 0}
+.tl-grid .c{
+  height:12px;border-radius:6px;background:rgba(255,255,255,.10);flex:1
+}
+.tl-grid .c.h{background:rgba(255,255,255,.14);height:14px}
+.tl-bar{background:#07110D;color:#B9D2C6;text-align:center;padding:12px;font-weight:800}
+</style>
+</head>
+
+<body>
+<div class="container">
+  <nav>
+    <div class="brand">
+      <!-- Replace with your TableLens icon file -->
+      <img class="icon" src="tablelens_128.png" alt="TableLens icon">
+      <span>
+        <span data-en="TableLens" data-zh="TableLens"></span> ·
+        <span data-en="On-Device Table Scanner" data-zh="本地表格识别扫描"></span>
+      </span>
+    </div>
+
+    <div class="nav-links">
+      <a href="#privacy" data-en="Privacy" data-zh="隐私"></a>
+      <a href="#support" data-en="Support" data-zh="支持"></a>
+    </div>
+
+    <div class="lang-switch">
+      <button id="btn-en" class="active">English</button>
+      <button id="btn-zh">中文</button>
+    </div>
+  </nav>
+
+  <section class="hero">
+    <div>
+      <h1
+        data-en="Turn table photos into editable data"
+        data-zh="把表格照片变成可编辑数据"></h1>
+
+      <p class="lead"
+         data-en="Scan or import images, fix edges, extract tables with local on-device AI, then edit cells and export CSV/JSON/PDF — no cloud upload by default."
+         data-zh="拍照或导入图片，自动校正边界，用本地模型提取表格结构与文字；支持编辑单元格并导出 CSV/JSON/PDF——默认不上传云端。"></p>
+
+      <div class="cta">
+        <a href="#" class="button" data-en="Get the App" data-zh="立即下载"></a>
+        <a href="#features" class="button ghost" data-en="Learn more" data-zh="了解功能"></a>
+      </div>
+
+      <div style="margin-top:24px;color:var(--text2)">
+        <span>• </span>
+        <span
+          data-en="On-device table extraction · Edge correction · Split view editing · CSV/JSON/PDF export · Privacy-first"
+          data-zh="本地表格提取 · 边界校正 · 分屏编辑 · CSV/JSON/PDF 导出 · 隐私优先"></span>
+      </div>
+    </div>
+
+    <div>
+      <!-- Hero mock: scan-to-table card -->
+      <div class="tl-card">
+        <div class="tl-top" data-en="Scan → Table → Export" data-zh="扫描 → 表格 → 导出"></div>
+        <div class="tl-body">
+          <div class="tl-row">
+            <div class="tl-mini"></div>
+            <div class="tl-line bold"></div>
+          </div>
+          <div class="tl-row">
+            <span class="tl-chip">
+              <span data-en="On-device AI" data-zh="本地模型"></span>
+              <span class="tl-dots"><span class="tl-dot"></span><span class="tl-dot"></span></span>
+            </span>
+            <span class="tl-chip">
+              <span data-en="No cloud upload by default" data-zh="默认不上传"></span>
+            </span>
+          </div>
+
+          <div class="tl-grid" aria-hidden="true">
+            <div class="r">
+              <div class="c h"></div><div class="c h"></div><div class="c h"></div>
+            </div>
+            <div class="r">
+              <div class="c"></div><div class="c"></div><div class="c"></div>
+            </div>
+            <div class="r">
+              <div class="c"></div><div class="c"></div><div class="c"></div>
+            </div>
+            <div class="r">
+              <div class="c"></div><div class="c"></div><div class="c"></div>
+            </div>
+          </div>
+        </div>
+        <div class="tl-bar"
+             data-en="Edit cells · Export CSV/JSON/PDF"
+             data-zh="编辑单元格 · 导出 CSV/JSON/PDF"></div>
+      </div>
+    </div>
+  </section>
+
+  <section id="features" class="section">
+    <h2 data-en="Core features" data-zh="核心功能"></h2>
+    <div class="grid-3" style="margin-top:24px">
+
+      <div class="card">
+        <div class="tag">Capture</div>
+        <h3 style="margin:12px 0"
+            data-en="Scan or import"
+            data-zh="拍摄或导入"></h3>
+        <p class="text2"
+           data-en="Capture tables with the camera or import images from Photos."
+           data-zh="用相机拍摄表格，或从相册导入已有图片。"></p>
+      </div>
+
+      <div class="card">
+        <div class="tag">Edges</div>
+        <h3 style="margin:12px 0"
+            data-en="Auto edge detection"
+            data-zh="自动边界检测"></h3>
+        <p class="text2"
+           data-en="Detect and correct document boundaries automatically, with manual corner adjustments when needed."
+           data-zh="自动检测并校正文档边界，支持拖动四角手动微调。"></p>
+      </div>
+
+      <div class="card">
+        <div class="tag">AI</div>
+        <h3 style="margin:12px 0"
+            data-en="On-device table extraction"
+            data-zh="本地表格识别"></h3>
+        <p class="text2"
+           data-en="Extract table structure and text using local on-device models (Chinese & English OCR supported)."
+           data-zh="使用本地模型识别表格结构并进行中英 OCR 文字提取。"></p>
+      </div>
+
+      <div class="card">
+        <div class="tag">Edit</div>
+        <h3 style="margin:12px 0"
+            data-en="Cell-level editing"
+            data-zh="单元格编辑"></h3>
+        <p class="text2"
+           data-en="Tap to edit cells, copy/paste, delete rows/columns, clear content, and undo up to 20 steps."
+           data-zh="点击单元格直接编辑，支持复制/粘贴、删除行列、清空内容与最多 20 步撤销。"></p>
+      </div>
+
+      <div class="card">
+        <div class="tag">Views</div>
+        <h3 style="margin:12px 0"
+            data-en="Split view workflow"
+            data-zh="分屏对照"></h3>
+        <p class="text2"
+           data-en="Work faster with split view (40% image + 60% table), or switch to image-only/table-only modes."
+           data-zh="分屏视图同时查看原图与表格（40%+60%），也可切换仅图像/仅表格模式。"></p>
+      </div>
+
+      <div class="card">
+        <div class="tag" style="background:rgba(255,255,255,.12);color:#fff">Export</div>
+        <h3 style="margin:12px 0"
+            data-en="Export & share"
+            data-zh="导出与分享"></h3>
+        <p class="text2"
+           data-en="Export CSV (UTF-8 with BOM), JSON, or A4 PDF — then share via the system share sheet."
+           data-zh="导出 CSV（UTF-8 with BOM）、JSON、A4 PDF，并通过系统分享菜单一键分享。"></p>
+      </div>
+
+    </div>
+  </section>
+
+  <section class="section">
+    <h2 data-en="Screenshots" data-zh="界面预览"></h2>
+    <p class="lead"
+       data-en="Replace the images below with real screenshots from TableLens."
+       data-zh="将下方占位图替换为 TableLens 的真实截图。"></p>
+    <div class="gallery" style="margin-top:16px">
+      <img class="landscape" src="en_1.png" data-en-src="en_1.png" data-zh-src="zh_1.png" alt="screenshot 1">
+      <img class="landscape" src="en_2.png" data-en-src="en_2.png" data-zh-src="zh_2.png" alt="screenshot 2">
+      <img class="landscape" src="en_3.png" data-en-src="en_3.png" data-zh-src="zh_3.png" alt="screenshot 3">
+      <img class="landscape" src="en_4.png" data-en-src="en_4.png" data-zh-src="zh_4.png" alt="screenshot 4">
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="grid-2">
+      <div class="card">
+        <h2 id="privacy" data-en="Privacy" data-zh="隐私"></h2>
+        <p class="text2"
+           data-en="TableLens is built for on-device trust."
+           data-zh="TableLens 以本地隐私为核心设计。"></p>
+        <ul style="margin:12px 0 0 18px; color: var(--text2); line-height:1.7">
+          <li
+            data-en="No account required. No cloud upload by default."
+            data-zh="无需账号，默认不上传云端。"></li>
+          <li
+            data-en="Table extraction runs locally on your device using on-device models."
+            data-zh="表格识别与 OCR 在设备端通过本地模型完成。"></li>
+          <li
+            data-en="Your documents, images, and edits are stored locally on your device."
+            data-zh="文档、图片与编辑结果均保存在本机。"></li>
+        </ul>
+      </div>
+
+      <div class="card">
+        <h2 id="support" data-en="Support" data-zh="支持"></h2>
+        <p class="text2"
+           data-en="Questions or feedback? Email us."
+           data-zh="问题或建议？欢迎邮件联系。"></p>
+        <p><a href="mailto:freesysck@outlook.com">freesysck@outlook.com</a></p>
+        <p>
+          <a href="#" target="_blank" rel="noopener"
+             data-en="Marketing site" data-zh="营销网站"></a><br>
+          <a href="#" target="_blank" rel="noopener"
+             data-en="Privacy policy" data-zh="隐私政策"></a>
+        </p>
+      </div>
+    </div>
+  </section>
+
+  <footer class="footer">
+    <div class="grid-2">
+      <div>
+        <strong>
+          <span data-en="TableLens" data-zh="TableLens"></span> ·
+          <span data-en="On-Device Table Scanner" data-zh="本地表格识别扫描"></span>
+        </strong><br>
+        <span
+          data-en="© 2026 TableLens. All rights reserved."
+          data-zh="© 2026 TableLens。保留所有权利。"></span>
+      </div>
+    </div>
+  </footer>
+</div>
+
+<script>
+function swapLangImages(lang){
+  document.querySelectorAll("img[data-en-src]").forEach(img=>{
+    const src = img.getAttribute(lang==="zh" ? "data-zh-src" : "data-en-src");
+    if(src) img.setAttribute("src", src);
+  });
+}
+function setLang(lang){
+  document.querySelectorAll("[data-en]").forEach(el=>{
+    const text = el.getAttribute(lang === "zh" ? "data-zh" : "data-en");
+    if(text!==null){ el.textContent = text; }
+  });
+  const titleEl = document.getElementById("title-el");
+  if(titleEl){
+    const t = titleEl.getAttribute(lang === "zh" ? "data-zh" : "data-en");
+    if(t) document.title = t;
+  }
+  const metaDesc = document.getElementById("meta-desc");
+  if(metaDesc){
+    const d = metaDesc.getAttribute(lang === "zh" ? "data-zh" : "data-en");
+    if(d) metaDesc.setAttribute("content", d);
+  }
+  swapLangImages(lang);
+  document.getElementById("btn-en").classList.toggle("active", lang==="en");
+  document.getElementById("btn-zh").classList.toggle("active", lang==="zh");
+  localStorage.setItem("TableLens-lang", lang);
+}
+document.getElementById("btn-en").onclick=()=>setLang("en");
+document.getElementById("btn-zh").onclick=()=>setLang("zh");
+const saved = localStorage.getItem("TableLens-lang") || (navigator.language.startsWith("zh")?"zh":"en");
+setLang(saved);
+</script>
+
+</body>
+</html>
